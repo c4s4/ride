@@ -49,16 +49,25 @@ class Ride:
         return self.start
 
     def score(self, x, y, t):
-        '''Return score if this ride is taken by a car at position (x, y) at time t'''
+        '''
+        Compute score for a ride.
+        Return:
+        - score
+        - x of arrival
+        - y of arrival
+        - time of arrival
+        '''
         if self.city is None:
             raise Exception("City was not set in Ride class")
         score = 0
-        d = t + abs(self.a - x) + abs(self.b - y)
-        if d == self.start:
+        # date of the beginning of the ride
+        begin = max(t, self.start)
+        end = begin + len(self)
+        if begin == self.start:
             score += self.city.bonus
-        if d + len(self) < self.end:
+        if end < self.end:
             score += len(self)
-        return score
+        return score, self.x, self.y, end
 
 
 class Car:
@@ -106,15 +115,13 @@ def write_file(cars, file, output):
         stream.write(result)
 
 
-def get_score(cars):
+def compute_score(cars):
     score = 0
     for car in cars:
         x, y, t = 0, 0, 0
         for ride in car.rides:
-            score += ride.score(x, y, t)
-            x = ride.x
-            y = ride.y
-            t += len(ride)
+            s, x, y, t = ride.score(x, y, t)
+            score += s
     return score
 
 
@@ -128,7 +135,7 @@ def process_file(file, input, output):
     cars = assign(city, rides)
     duration = time.time() - start
     print("  duration: %.3fs" % duration)
-    score = get_score(cars)
+    score = compute_score(cars)
     print("  score: %s" % score)
     write_file(cars, file, output)
     return score

@@ -40,18 +40,18 @@ class RideTest(unittest.TestCase):
         c = ride.City('3 4 2 3 2 10')
         ride.Ride.city = c
         r = ride.Ride('0 0 2 3 2 9')
-        self.assertEqual(r.score(0, 0, 0), 5)
+        self.assertEqual(r.score(0, 0, 0), (7, 2, 3, 7))
         r = ride.Ride('0 0 2 3 0 9')
-        self.assertEqual(r.score(0, 0, 0), 7)
+        self.assertEqual(r.score(0, 0, 0), (7, 2, 3, 5))
         r = ride.Ride('0 0 2 3 0 1')
-        self.assertEqual(r.score(0, 0, 0), 2)
+        self.assertEqual(r.score(0, 0, 0), (2, 2, 3, 5))
         r = ride.Ride('0 0 2 3 0 5')
-        self.assertEqual(r.score(0, 0, 0), 2)
+        self.assertEqual(r.score(0, 0, 0), (2, 2, 3, 5))
         r = ride.Ride('0 0 2 3 0 6')
-        self.assertEqual(r.score(0, 0, 0), 7)
+        self.assertEqual(r.score(0, 0, 0), (7, 2, 3, 5))
         # when car waits
         r = ride.Ride('0 0 2 3 2 8')
-        self.assertEqual(r.score(0, 0, 0), 5)
+        self.assertEqual(r.score(0, 0, 0), (7, 2, 3, 7))
 
 
 class ParseTest(unittest.TestCase):
