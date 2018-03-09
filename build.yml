@@ -1,6 +1,6 @@
 # NeON Build File (http://github.com/c4s4/neon)
 
-default: [test, run]
+default: [clean, test, run]
 extends:
 - c4s4/build/python.yml
 - c4s4/build/release.yml
@@ -11,11 +11,4 @@ targets:
     doc: Run on all examples
     steps:
     - mkdir: =BUILD_DIR
-    - for: file
-      in:  find("examples", "*.in")
-      do:
-      - 'dest = file[0:len(file)-3]+".out"'
-      - $: '={VENV_DIR}/bin/python ride examples/={file} > ={BUILD_DIR}/={dest}'
-    - zip:    '*.out'
-      dir:    =BUILD_DIR
-      tofile: '={BUILD_DIR}/result.zip'
+    - $: ['={VENV_DIR}/bin/python', 'ride', 'examples', =BUILD_DIR]
