@@ -80,7 +80,7 @@ def assign(city, rides):
     return cars
 
 
-def main(file):
+def process(file):
     with open(file) as stream:
         source = stream.read().strip()
     city, rides = parse(source)
@@ -89,7 +89,12 @@ def main(file):
         print(car)
 
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) != 2:
         print("You must pass file on command line")
-    main(sys.argv[1])
+    for file in sys.argv[1:]:
+        process(file)
+
+
+if __name__ == '__main__':
+    main()
