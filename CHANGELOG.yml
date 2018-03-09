@@ -4,23 +4,12 @@
   date:    2018-03-09
   summary: Added score computation
   note:
-  - 'Scores are the following:
-     a_example.in:
-       duration: 0.001s
-       score: 14
-     b_should_be_easy.in:
-       duration: 0.004s
-       score: 180798
-     c_no_hurry.in:
-       duration: 0.091s
-       score: 16052429
-     d_metropolis.in:
-       duration: 0.093s
-       score: 10684176
-     e_high_bonus.in:
-       duration: 0.094s
-       score: 21599373
-     total: 48516790'
+  - 'a_example.in:        14
+     b_should_be_easy.in: 180798
+     c_no_hurry.in:       16052429
+     d_metropolis.in:     10684176
+     e_high_bonus.in:     21599373
+     total:               48516790'
 
 - version: 1.0.0
   date:    2018-03-08
