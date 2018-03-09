@@ -95,14 +95,14 @@ def parse(source):
     return city, rides
 
 
-def assign(city, rides):
+def assign_rides(rides):
     cars = []
-    for i in range(city.cars):
+    for i in range(Ride.city.cars):
         cars.append(Car(i + 1))
     car = 0
     for r in rides:
         cars[car].add(r)
-        car = (car + 1) % city.cars
+        car = (car + 1) % Ride.city.cars
     return cars
 
 
@@ -132,7 +132,7 @@ def process_file(file, input, output):
     with open(path) as stream:
         source = stream.read().strip()
     city, rides = parse(source)
-    cars = assign(city, rides)
+    cars = assign_rides(rides)
     duration = time.time() - start
     print("  duration: %.3fs" % duration)
     score = compute_score(cars)
@@ -147,8 +147,14 @@ def process_directory(input, output):
         if os.path.isfile(os.path.join(input, f)) and f.endswith('.in')
     ])
     score = 0
+    report = ''
     for file in files:
-        score += process_file(file, input, output)
+        s = process_file(file, input, output)
+        report += '%s %s\n' % ((file+':').ljust(20), s)
+        score += s
+    report += '%s %s' % ('total:'.ljust(20), score)
+    with open(os.path.join(output, 'README'), 'w') as stream:
+        stream.write(report)
     print("total: %s" % score)
 
 
