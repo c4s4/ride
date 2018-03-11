@@ -6,6 +6,8 @@ import sys
 import time
 import os.path
 
+city = None
+
 
 class City:
     def __init__(self, line):
@@ -21,11 +23,7 @@ class City:
 
 
 class Ride:
-
-    index = 0
-    city = None
-
-    def __init__(self, line):
+    def __init__(self, index, line):
         fields = line.split(' ')
         if len(fields) != 6:
             raise Exception("Bad ride line")
@@ -35,8 +33,7 @@ class Ride:
         self.y = int(fields[3])
         self.start = int(fields[4])
         self.end = int(fields[5])
-        self.index = Ride.index
-        Ride.index += 1
+        self.index = index
 
     def __repr__(self):
         return str(self.index)
@@ -48,61 +45,109 @@ class Ride:
         '''Key for rides sorting'''
         return self.start
 
-    def score(self, x, y, t):
-        '''
-        Compute score for a ride.
-        Return:
-        - score
-        - x of arrival
-        - y of arrival
-        - time of arrival
-        '''
-        if self.city is None:
-            raise Exception("City was not set in Ride class")
+
+class Move:
+    def __init__(self, car, ride):
         score = 0
         # date of the beginning of the ride
-        begin = max(t, self.start)
-        end = begin + len(self)
-        if begin == self.start:
-            score += self.city.bonus
-        if end < self.end:
-            score += len(self)
-        return score, self.x, self.y, end
+        begin = max(car.t + distance(car.x, car.y, ride.a, ride.b), ride.start)
+        end = begin + len(ride)
+        if begin == ride.start:
+            score += city.bonus
+        if end < ride.end:
+            score += len(ride)
+        self.ride = ride
+        self.score = score
+        self.a = car.x
+        self.b = car.y
+        self.x = ride.x
+        self.y = ride.y
+        self.start = car.t
+        self.end = end
+        self.value = float(self.score) / float(end - car.t)
+        self.car = car
+
+    def __repr__(self):
+        return '<score car=%s, a=%s, b=%s, x=%s, y=%s, start=%s, end=%s>' % \
+               (self.car, self.a, self.b, self.x, self.y, self.start, self.end)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.a == other.a and \
+                   self.b == other.b and \
+                   self.x == other.x and \
+                   self.y == other.y and \
+                   self.start == other.start and \
+                   self.end == other.end
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class Car:
     def __init__(self, index):
         self.index = index
-        self.rides = []
+        self.moves = []
+        self.x = 0
+        self.y = 0
+        self.t = 0
 
-    def add(self, ride):
-        self.rides.append(ride)
+    def add(self, move):
+        self.moves.append(move)
+        self.x = move.x
+        self.y = move.y
+        self.t = move.end
 
     def __repr__(self):
-        return "%s %s" % (str(len(self.rides)),
-                          ' '.join([str(r) for r in self.rides]))
+        return "%s %s" % (str(len(self.moves)),
+                          ' '.join([str(m.ride.index) for m in self.moves]))
+
+
+def distance(a, b, x, y):
+    return abs(x - a) + abs(y - b)
 
 
 def parse(source):
+    global city
     lines = source.strip().split('\n')
     city = City(lines[0])
-    Ride.city = city
+    Move.city = city
     rides = []
+    index = 0
     for line in lines[1:]:
-        rides.append(Ride(line))
+        rides.append(Ride(index, line))
+        index += 1
     # sort rides with start time
     rides = sorted(rides, key=Ride.key)
     return city, rides
 
 
-def assign_rides(rides):
-    cars = []
-    for i in range(Ride.city.cars):
-        cars.append(Car(i + 1))
-    car = 0
-    for r in rides:
-        cars[car].add(r)
-        car = (car + 1) % Ride.city.cars
+def assign_rides_sort(rides):
+    cars = [Car(i) for i in range(city.cars)]
+    index = 0
+    for ride in rides:
+        car = cars[index]
+        move = Move(car, ride)
+        car.add(move)
+        index = (index + 1) % city.cars
+    return cars
+
+
+def assign_rides_value(rides):
+    cars = [Car(i) for i in range(city.cars)]
+    remaining = rides[:]
+    for ride in remaining:
+        best = None
+        for car in cars:
+            if car.t < city.steps:
+                move = Move(car, ride)
+                if best is None or move.value > best.value or \
+                    (move.value == best.value and move.end < best.end):
+                    best = move
+        remaining.remove(best.ride)
+        best.car.add(best)
     return cars
 
 
@@ -118,10 +163,8 @@ def write_file(cars, file, output):
 def compute_score(cars):
     score = 0
     for car in cars:
-        x, y, t = 0, 0, 0
-        for ride in car.rides:
-            s, x, y, t = ride.score(x, y, t)
-            score += s
+        for move in car.moves:
+            score += move.score
     return score
 
 
@@ -132,7 +175,7 @@ def process_file(file, input, output):
     with open(path) as stream:
         source = stream.read().strip()
     city, rides = parse(source)
-    cars = assign_rides(rides)
+    cars = assign(rides)
     duration = time.time() - start
     print("  duration: %.3fs" % duration)
     score = compute_score(cars)
@@ -150,9 +193,9 @@ def process_directory(input, output):
     report = ''
     for file in files:
         s = process_file(file, input, output)
-        report += '%s %s\n' % ((file+':').ljust(20), s)
+        report += '%s %s\n' % ((file + ':').ljust(20), s)
         score += s
-    report += '%s %s' % ('total:'.ljust(20), score)
+    report += '%s %s\n' % ('total:'.ljust(20), score)
     with open(os.path.join(output, 'README'), 'w') as stream:
         stream.write(report)
     print("total: %s" % score)
@@ -163,6 +206,11 @@ def main():
         print("You must pass input and output directories")
     process_directory(sys.argv[1], sys.argv[2])
 
+
+# assignation function for rides, possible values
+# - assign_rides_sort
+# - assign_rides_value
+assign = assign_rides_sort
 
 if __name__ == '__main__':
     main()
