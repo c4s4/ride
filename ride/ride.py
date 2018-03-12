@@ -6,79 +6,12 @@ import sys
 import time
 import os.path
 
-city = None
 
-
-class City:
-    def __init__(self, line):
-        fields = line.split(' ')
-        if len(fields) != 6:
-            raise Exception("Bad first line: '%s'" % line)
-        self.rows = int(fields[0])
-        self.columns = int(fields[1])
-        self.cars = int(fields[2])
-        self.rides = int(fields[3])
-        self.bonus = int(fields[4])
-        self.steps = int(fields[5])
-
-
-class Ride:
-    def __init__(self, index, line):
-        fields = line.split(' ')
-        if len(fields) != 6:
-            raise Exception("Bad ride line")
-        self.a = int(fields[0])
-        self.b = int(fields[1])
-        self.x = int(fields[2])
-        self.y = int(fields[3])
-        self.start = int(fields[4])
-        self.end = int(fields[5])
-        self.index = index
-
-    def __repr__(self):
-        return str(self.index)
-
-    def __len__(self):
-        return abs(self.a - self.x) + abs(self.b - self.y)
-
-    def key(self):
-        '''Key for rides sorting'''
-        return self.start
-
-
-class Move:
-    def __init__(self, car, ride):
-        score = 0
-        # date of the beginning of the ride
-        begin = max(car.t + distance(car.x, car.y, ride.a, ride.b), ride.start)
-        end = begin + len(ride)
-        if begin == ride.start:
-            score += city.bonus
-        if end < ride.end:
-            score += len(ride)
-        self.ride = ride
-        self.score = score
-        self.a = car.x
-        self.b = car.y
-        self.x = ride.x
-        self.y = ride.y
-        self.start = car.t
-        self.end = end
-        self.value = float(self.score) / float(end - car.t)
-        self.car = car
-
-    def __repr__(self):
-        return '<score car=%s, a=%s, b=%s, x=%s, y=%s, start=%s, end=%s>' % \
-               (self.car, self.a, self.b, self.x, self.y, self.start, self.end)
+class EqualMixin:
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.a == other.a and \
-                   self.b == other.b and \
-                   self.x == other.x and \
-                   self.y == other.y and \
-                   self.start == other.start and \
-                   self.end == other.end
+            return self.__dict__ == other.__dict__
         else:
             return False
 
@@ -86,7 +19,67 @@ class Move:
         return not self.__eq__(other)
 
 
-class Car:
+class City(EqualMixin):
+
+    @staticmethod
+    def parse(line):
+        fields = line.split(' ')
+        if len(fields) != 6:
+            raise Exception("Bad first line: '%s'" % line)
+        return City(
+            rows=int(fields[0]),
+            cols=int(fields[1]),
+            cars=int(fields[2]),
+            rides=int(fields[3]),
+            bonus=int(fields[4]),
+            steps=int(fields[5]))
+
+    def __init__(self, rows, cols, cars, rides, bonus, steps):
+        self.rows = rows
+        self.cols = cols
+        self.cars = cars
+        self.rides = rides
+        self.bonus = bonus
+        self.steps = steps
+
+
+class Ride(EqualMixin):
+
+    @staticmethod
+    def parse(index, line, city):
+        fields = line.split(' ')
+        if len(fields) != 6:
+            raise Exception("Bad ride line: '%s'" % line)
+        return Ride(
+            index=index,
+            a=int(fields[0]),
+            b=int(fields[1]),
+            x=int(fields[2]),
+            y=int(fields[3]),
+            start=int(fields[4]),
+            end=int(fields[5]),
+            city=city)
+
+    def __init__(self, index, a, b, x, y, start, end, city):
+        self.index = index
+        self.a = a
+        self.b = b
+        self.x = x
+        self.y = y
+        self.start = start
+        self.end = end
+        self.city = city
+
+    def len(self):
+        return distance(self.a, self.b, self.x, self.y)
+
+    def key(self):
+        '''Key for rides sorting'''
+        return self.start
+
+
+class Car(EqualMixin):
+
     def __init__(self, index):
         self.index = index
         self.moves = []
@@ -100,9 +93,31 @@ class Car:
         self.y = move.y
         self.t = move.end
 
-    def __repr__(self):
+    def __str__(self):
         return "%s %s" % (str(len(self.moves)),
                           ' '.join([str(m.ride.index) for m in self.moves]))
+
+
+class Move(EqualMixin):
+
+    def __init__(self, car, ride):
+        self.car = car
+        self.ride = ride
+        self.a = car.x
+        self.b = car.y
+        self.x = ride.x
+        self.y = ride.y
+        self.start = car.t
+        score = 0
+        begin = max(car.t + distance(car.x, car.y, ride.a, ride.b), ride.start)
+        end = begin + ride.len()
+        if begin == ride.start:
+            score += ride.city.bonus
+        if end < ride.end:
+            score += ride.len()
+        self.end = end
+        self.score = score
+        self.value = float(score) / float(end - car.t)
 
 
 def distance(a, b, x, y):
@@ -112,12 +127,12 @@ def distance(a, b, x, y):
 def parse(source):
     global city
     lines = source.strip().split('\n')
-    city = City(lines[0])
+    city = City.parse(lines[0])
     Move.city = city
     rides = []
     index = 0
     for line in lines[1:]:
-        rides.append(Ride(index, line))
+        rides.append(Ride.parse(index, line, city))
         index += 1
     # sort rides with start time
     rides = sorted(rides, key=Ride.key)
