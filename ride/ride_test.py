@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 import unittest
-from .ride import *
+from .ride import City, Ride, Car, Move, distance, parse
 
 
 class CityTest(unittest.TestCase):

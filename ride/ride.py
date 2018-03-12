@@ -74,7 +74,6 @@ class Ride(EqualMixin):
         return distance(self.a, self.b, self.x, self.y)
 
     def key(self):
-        '''Key for rides sorting'''
         return self.start
 
 
@@ -189,7 +188,7 @@ def process_file(file, input, output):
     path = os.path.join(input, file)
     with open(path) as stream:
         source = stream.read().strip()
-    city, rides = parse(source)
+    _, rides = parse(source)
     cars = assign(rides)
     duration = time.time() - start
     print("  duration: %.3fs" % duration)
