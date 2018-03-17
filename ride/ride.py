@@ -152,16 +152,15 @@ def assign_rides_sort(rides):
 def assign_rides_value(rides):
     cars = [Car(i) for i in range(city.cars)]
     remaining = rides[:]
-    for ride in remaining:
-        best = None
-        for car in cars:
-            if car.t < city.steps:
+    for car in cars:
+        while car.t < city.steps and len(remaining) > 0:
+            best = None
+            for ride in remaining:
                 move = Move(car, ride)
-                if best is None or move.value > best.value or \
-                    (move.value == best.value and move.end < best.end):
+                if best == None or best.value < move.value:
                     best = move
-        remaining.remove(best.ride)
-        best.car.add(best)
+            remaining.remove(best.ride)
+            car.add(best)
     return cars
 
 
@@ -194,6 +193,7 @@ def process_file(file, input, output):
     print("  duration: %.3fs" % duration)
     score = compute_score(cars)
     print("  score: %s" % score)
+    sys.stdout.flush()
     write_file(cars, file, output)
     return score
 
@@ -221,10 +221,10 @@ def main():
     process_directory(sys.argv[1], sys.argv[2])
 
 
-# assignation function for rides, possible values
+# cars assignation:
 # - assign_rides_sort
 # - assign_rides_value
-assign = assign_rides_sort
+assign = assign_rides_value
 
 if __name__ == '__main__':
     main()
