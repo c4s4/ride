@@ -110,9 +110,9 @@ class Move(EqualMixin):
         score = 0
         begin = max(car.t + distance(car.x, car.y, ride.a, ride.b), ride.start)
         end = begin + ride.len()
-        if begin == ride.start:
+        if begin <= ride.start:
             score += ride.city.bonus
-        if end < ride.end:
+        if end <= ride.end:
             score += ride.len()
         self.end = end
         self.score = score
