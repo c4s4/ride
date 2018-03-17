@@ -1,15 +1,26 @@
 # Semantic Change Log (http://github.com/c4s4/changelog)
 
+- version: 1.2.0
+  date:    2018-03-17
+  summary: New algorithm
+  note:
+  - 'a_example.in:        8
+     b_should_be_easy.in: 166949
+     c_no_hurry.in:       15786954
+     d_metropolis.in:     9759668
+     e_high_bonus.in:     20513395
+     total:               46226974'
+
 - version: 1.1.0
   date:    2018-03-09
   summary: Added score computation
   note:
-  - 'a_example.in:        14
-     b_should_be_easy.in: 180798
-     c_no_hurry.in:       16052429
-     d_metropolis.in:     10684176
-     e_high_bonus.in:     21599373
-     total:               48516790'
+  - 'a_example.in:        4
+     b_should_be_easy.in: 176877
+     c_no_hurry.in:       8001695
+     d_metropolis.in:     5266768
+     e_high_bonus.in:     21429663
+     total:               34875007'
 
 - version: 1.0.0
   date:    2018-03-08
