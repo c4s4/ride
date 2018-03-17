@@ -224,7 +224,7 @@ def main():
 # cars assignation:
 # - assign_rides_sort
 # - assign_rides_value
-assign = assign_rides_value
+assign = assign_rides_sort
 
 if __name__ == '__main__':
     main()
