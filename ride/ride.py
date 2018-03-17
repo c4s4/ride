@@ -116,7 +116,8 @@ class Move(EqualMixin):
             score += ride.len()
         self.end = end
         self.score = score
-        self.value = float(score) / float(end - car.t) - (0.1*end) / city.steps
+        self.value = float(score) / float(end - car.t) - (
+            0.1 * end) / ride.city.steps
 
 
 def distance(a, b, x, y):
@@ -224,7 +225,7 @@ def main():
 # cars assignation:
 # - assign_rides_sort
 # - assign_rides_value
-assign = assign_rides_sort
+assign = assign_rides_value
 
 if __name__ == '__main__':
     main()
