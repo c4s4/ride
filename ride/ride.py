@@ -116,7 +116,7 @@ class Move(EqualMixin):
             score += ride.len()
         self.end = end
         self.score = score
-        self.value = float(score) / float(end - car.t)
+        self.value = float(score) / float(end - car.t) - (0.1*end) / city.steps
 
 
 def distance(a, b, x, y):
