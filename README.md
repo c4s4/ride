@@ -13,5 +13,4 @@ Results
 | c_no_hurry.in       | 15786954 |
 | d_metropolis.in     |  9759668 |
 | e_high_bonus.in     | 20513395 |
-| ------------------- | -------- |
 | total               | 46226974 |
