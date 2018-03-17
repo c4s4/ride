@@ -7,7 +7,7 @@ Results
 -------
 
 | File                | Score    |
-| ------------------- | -------- |
+| ------------------- | -------: |
 | a_example.in        |       8  |
 | b_should_be_easy.in |  166949  |
 | c_no_hurry.in       | 15786954 |
