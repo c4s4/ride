@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 import sys
-from ride.ride import main
+from ride import main
 
 if __name__ == '__main__':
     main()
