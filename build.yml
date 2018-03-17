@@ -13,8 +13,3 @@ targets:
     - delete: =BUILD_DIR
     - mkdir: =BUILD_DIR
     - $: ['={VENV_DIR}/bin/python', 'ride', 'examples', =BUILD_DIR]
-
-  nohup:
-    doc: Run computation in nohup mode
-    steps:
-    - $: 'nohup neon &'
