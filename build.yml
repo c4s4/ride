@@ -3,7 +3,6 @@
 default: [clean, format, test, run]
 extends:
 - c4s4/build/python.yml
-- c4s4/build/release.yml
 
 targets:
 
